@@ -87,6 +87,12 @@ func handleInput(w io.Writer, input string, exit chan<- struct{}) error {
 	case "clear":
 		builtins.Clear(os.Stdout)
 		return nil
+	case "date":
+		builtins.Date()
+		return nil
+	case "pwd":
+		builtins.Pwd()
+		return nil
 	case "exit":
 		exit <- struct{}{}
 		return nil
