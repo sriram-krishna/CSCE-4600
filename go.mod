@@ -1,4 +1,4 @@
-module github.com/jh125486/CSCE4600
+module github.com/sriram-krishna/CSCE-4600
 
 go 1.19
 
