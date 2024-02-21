@@ -34,7 +34,9 @@ func TestEcho(t *testing.T) {
 
 			// Read the output
 			var buf bytes.Buffer
-			buf.ReadFrom(r)
+			if _, err := buf.ReadFrom(r); err != nil {
+				t.Errorf("Failed to read from buffer: %v", err)
+			}
 
 			// Restore os.Stdout
 			os.Stdout = originalStdout
