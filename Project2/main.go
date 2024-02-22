@@ -82,7 +82,7 @@ func handleInput(w io.Writer, input string, exit chan<- struct{}) error {
 		builtins.Echo(args)
 		return nil
 	case "whoami":
-		builtins.Whoami()
+		builtins.Whoami(&builtins.RealUserRetriever{})
 		return nil
 	case "clear":
 		builtins.Clear(os.Stdout)

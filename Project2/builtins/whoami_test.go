@@ -2,35 +2,60 @@ package builtins
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"os/user"
 	"testing"
 )
 
-func TestWhoami(t *testing.T) {
-	// Redirect stdout to capture the output
-	originalStdout := os.Stdout
+type MockUserRetriever struct {
+	User *user.User
+	Err  error
+}
+
+func (m *MockUserRetriever) Current() (*user.User, error) {
+	return m.User, m.Err
+}
+
+func TestWhoamiSuccess(t *testing.T) {
+	mockUser := &user.User{Username: "testuser"}
+	retriever := &MockUserRetriever{User: mockUser, Err: nil}
+
+	oldStdout := os.Stdout
 	r, w, _ := os.Pipe()
 	os.Stdout = w
 
-	Whoami()
+	Whoami(retriever)
 
-	// Close the write end and restore stdout
 	w.Close()
-	os.Stdout = originalStdout
+	os.Stdout = oldStdout
 
-	// Read and verify the output
 	var buf bytes.Buffer
 	buf.ReadFrom(r)
 	output := buf.String()
 
-	currentUser, err := user.Current()
-	if err != nil {
-		t.Fatalf("Failed to get current user: %v", err)
+	if output != mockUser.Username+"\n" {
+		t.Errorf("Expected username %s, got %s", mockUser.Username, output)
 	}
+}
 
-	expected := currentUser.Username + "\n"
-	if output != expected {
-		t.Errorf("Expected %q, got %q", expected, output)
+func TestWhoamiError(t *testing.T) {
+	retriever := &MockUserRetriever{Err: fmt.Errorf("error retrieving user")}
+
+	oldStderr := os.Stderr
+	r, w, _ := os.Pipe()
+	os.Stderr = w
+
+	Whoami(retriever)
+
+	w.Close()
+	os.Stderr = oldStderr
+
+	var buf bytes.Buffer
+	buf.ReadFrom(r)
+	output := buf.String()
+
+	if !bytes.Contains([]byte(output), []byte("whoami error")) {
+		t.Errorf("Expected error output, got %s", output)
 	}
 }
