@@ -1,11 +1,10 @@
 package builtins
 
 import (
-	"fmt"
 	"time"
 )
 
-// Date prints the current date and time.
-func Date() {
-	fmt.Println(time.Now().Format(time.RFC1123))
+// Date returns the current date and time in a predefined format.
+func Date() string {
+	return time.Now().Format("2006-01-02 15:04:05 MST")
 }

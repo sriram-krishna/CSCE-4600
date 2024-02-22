@@ -1,50 +1,42 @@
-package builtins
+package builtins_test
 
 import (
-	"bytes"
-	"os"
 	"testing"
+
+	"github.com/sriram-krishna/CSCE-4600/Project2/builtins"
 )
 
 func TestEcho(t *testing.T) {
-	cases := []struct {
-		name     string
-		args     []string
-		expected string
+	tests := []struct {
+		name string
+		args []string
+		want string
 	}{
-		{"no args", []string{}, "\n"},
-		{"one arg", []string{"hello"}, "hello\n"},
-		{"multiple args", []string{"hello", "world"}, "hello world\n"},
+		{
+			name: "no args",
+			args: []string{},
+			want: "",
+		},
+		{
+			name: "one arg",
+			args: []string{"hello"},
+			want: "hello",
+		},
+		{
+			name: "multiple args",
+			args: []string{"hello", "world"},
+			want: "hello world",
+		},
+		{
+			name: "args with spaces",
+			args: []string{"hello", "world", "with spaces"},
+			want: "hello world with spaces",
+		},
 	}
-
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			// Save current os.Stdout
-			originalStdout := os.Stdout
-
-			// Create a new bytes buffer and set it as os.Stdout
-			r, w, _ := os.Pipe()
-			os.Stdout = w
-
-			// Call Echo
-			Echo(tc.args)
-
-			// Close the write end of the pipe to finish writing
-			w.Close()
-
-			// Read the output
-			var buf bytes.Buffer
-			if _, err := buf.ReadFrom(r); err != nil {
-				t.Errorf("Failed to read from buffer: %v", err)
-			}
-
-			// Restore os.Stdout
-			os.Stdout = originalStdout
-
-			// Check the output
-			got := buf.String()
-			if got != tc.expected {
-				t.Errorf("Echo(%v) = %q, want %q", tc.args, got, tc.expected)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := builtins.Echo(tt.args...); got != tt.want {
+				t.Errorf("Echo() = %v, want %v", got, tt.want)
 			}
 		})
 	}

@@ -1,29 +1,14 @@
 package builtins
 
 import (
-	"fmt"
-	"os"
 	"os/user"
 )
 
-// UserRetriever defines an interface for retrieving user details.
-type UserRetriever interface {
-	Current() (*user.User, error)
-}
-
-// RealUserRetriever retrieves real user information using the os/user package.
-type RealUserRetriever struct{}
-
-func (r *RealUserRetriever) Current() (*user.User, error) {
-	return user.Current()
-}
-
-// Whoami prints the current user's username using the provided UserRetriever.
-func Whoami(retriever UserRetriever) {
-	currentUser, err := retriever.Current()
+// Whoami returns the username of the current user.
+func Whoami() (string, error) {
+	user, err := user.Current()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "whoami error: %v\n", err)
-		return
+		return "", err // Return the error to the caller
 	}
-	fmt.Println(currentUser.Username)
+	return user.Username, nil
 }

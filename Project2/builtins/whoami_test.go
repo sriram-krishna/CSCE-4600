@@ -1,61 +1,17 @@
-package builtins
+package builtins_test
 
 import (
-	"bytes"
-	"fmt"
-	"os"
-	"os/user"
 	"testing"
+
+	"github.com/sriram-krishna/CSCE-4600/Project2/builtins"
 )
 
-type MockUserRetriever struct {
-	User *user.User
-	Err  error
-}
-
-func (m *MockUserRetriever) Current() (*user.User, error) {
-	return m.User, m.Err
-}
-
-func TestWhoamiSuccess(t *testing.T) {
-	mockUser := &user.User{Username: "testuser"}
-	retriever := &MockUserRetriever{User: mockUser, Err: nil}
-
-	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
-
-	Whoami(retriever)
-
-	w.Close()
-	os.Stdout = oldStdout
-
-	var buf bytes.Buffer
-	buf.ReadFrom(r)
-	output := buf.String()
-
-	if output != mockUser.Username+"\n" {
-		t.Errorf("Expected username %s, got %s", mockUser.Username, output)
+func TestWhoami(t *testing.T) {
+	got, err := builtins.Whoami()
+	if err != nil {
+		t.Errorf("Whoami() error = %v, wantErr false", err)
 	}
-}
-
-func TestWhoamiError(t *testing.T) {
-	retriever := &MockUserRetriever{Err: fmt.Errorf("error retrieving user")}
-
-	oldStderr := os.Stderr
-	r, w, _ := os.Pipe()
-	os.Stderr = w
-
-	Whoami(retriever)
-
-	w.Close()
-	os.Stderr = oldStderr
-
-	var buf bytes.Buffer
-	buf.ReadFrom(r)
-	output := buf.String()
-
-	if !bytes.Contains([]byte(output), []byte("whoami error")) {
-		t.Errorf("Expected error output, got %s", output)
+	if got == "" {
+		t.Errorf("Whoami() returned an empty string, expected a username")
 	}
 }

@@ -1,11 +1,10 @@
 package builtins
 
 import (
-	"fmt"
 	"strings"
 )
 
-// Echo prints the arguments passed to it
-func Echo(args []string) {
-	fmt.Println(strings.Join(args, " "))
+// Echo concatenates the input arguments with a space and returns the result.
+func Echo(args ...string) string {
+	return strings.Join(args, " ")
 }

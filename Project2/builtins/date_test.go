@@ -1,31 +1,18 @@
-package builtins
+package builtins_test
 
 import (
-	"bytes"
-	"os"
+	"regexp"
 	"testing"
+
+	"github.com/sriram-krishna/CSCE-4600/Project2/builtins"
 )
 
 func TestDate(t *testing.T) {
-	// Capture the output
-	var buf bytes.Buffer
-	originalStdout := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
+	got := builtins.Date()
 
-	Date()
-
-	// Cleanup
-	w.Close()
-	os.Stdout = originalStdout
-
-	// Read output
-	buf.ReadFrom(r)
-	output := buf.String()
-
-	if output == "" {
-		t.Errorf("Expected date output to be non-empty")
+	// Basic check for date format "2006-01-02 15:04:05 MST"
+	match, _ := regexp.MatchString(`^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [A-Z]{3}$`, got)
+	if !match {
+		t.Errorf("Date() got = %v, which does not match the expected format", got)
 	}
-	// Further validations could include checking the format of the date,
-	// but given the dynamic nature of the output, this might be sufficient.
 }

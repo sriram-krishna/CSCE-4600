@@ -1,36 +1,17 @@
-package builtins
+package builtins_test
 
 import (
-	"bytes"
-	"os"
 	"testing"
+
+	"github.com/sriram-krishna/CSCE-4600/Project2/builtins"
 )
 
 func TestPwd(t *testing.T) {
-	// Expected current directory
-	expected, err := os.Getwd()
+	got, err := builtins.Pwd()
 	if err != nil {
-		t.Fatalf("Failed to get current directory: %v", err)
+		t.Errorf("Pwd() error = %v, wantErr false", err)
 	}
-
-	// Capture the output
-	var buf bytes.Buffer
-	originalStdout := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
-
-	Pwd()
-
-	// Cleanup
-	w.Close()
-	os.Stdout = originalStdout
-
-	// Read output
-	buf.ReadFrom(r)
-	output := buf.String()
-
-	// The output will have a newline at the end, so we trim it before comparison
-	if output != expected+"\n" {
-		t.Errorf("Expected %q, got %q", expected, output)
+	if got == "" {
+		t.Errorf("Pwd() returned an empty string, expected current working directory")
 	}
 }

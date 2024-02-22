@@ -75,30 +75,33 @@ func handleInput(w io.Writer, input string, exit chan<- struct{}) error {
 	// New builtin commands should be added here. Eventually this should be refactored to its own func.
 	switch name {
 	case "cd":
-		return builtins.ChangeDirectory(args...)
-	case "env":
-		return builtins.EnvironmentVariables(w, args...)
+		if err := builtins.ChangeDirectory(args...); err != nil {
+			return err
+		}
 	case "echo":
-		builtins.Echo(args)
-		return nil
+		_, _ = fmt.Fprintln(w, builtins.Echo(args...))
 	case "whoami":
-		builtins.Whoami(&builtins.RealUserRetriever{})
-		return nil
+		username, err := builtins.Whoami()
+		if err != nil {
+			return err
+		}
+		_, _ = fmt.Fprintln(w, username)
 	case "clear":
-		builtins.Clear(os.Stdout)
-		return nil
+		_, _ = fmt.Fprint(w, builtins.Clear())
 	case "date":
-		builtins.Date()
-		return nil
+		_, _ = fmt.Fprintln(w, builtins.Date())
 	case "pwd":
-		builtins.Pwd()
-		return nil
+		dir, err := builtins.Pwd()
+		if err != nil {
+			return err
+		}
+		_, _ = fmt.Fprintln(w, dir)
 	case "exit":
 		exit <- struct{}{}
-		return nil
+	default:
+		return executeCommand(name, args...)
 	}
-
-	return executeCommand(name, args...)
+	return nil
 }
 
 func executeCommand(name string, arg ...string) error {
